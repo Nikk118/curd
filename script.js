@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (display) {
                 sno = e.target.id.substr(1);
                 if (confirm("delete this note")) {
-                    window.location = `/curd/index.php?delete=${sno}`;
+                    console.log("yes here")
+                    window.location = `/todo_list/index.php?delete=${sno}`;
                 }
             }
         });

@@ -1,8 +1,8 @@
 .add {
     background-color: #fffffc;
     position: fixed;
-    right: 5%;
-    bottom: 4%;
+    right: 4rem;
+    bottom: 1rem;
     text-align: end;
     cursor: pointer;
     /* z-index: 1000; */
@@ -12,28 +12,25 @@
 
 .navbar-brand{
     font-size: 50px;
-    padding-right: 239px;
+    padding-left: 9rem;
     color: white;
     
 }
+.navbar-brand:hover{
+    color: white;
+}
 body{
     background: #000106;
-    padding-bottom: 150px;
+    padding-bottom: 10rem;
 }
-table{
-    width: 90%;
-    margin: auto;
-    margin-top: 50px;
-    margin-bottom: 30px;
+.dis_container{
+    width:75vw;
+    margin:auto
 }
-tr{
-    margin-top: 49px;
-    /* color: orange; */
-} 
 .display{
     border-radius: 10px;
     background-color: #625c28;
-    width: 60rem;
+    width: 75vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
