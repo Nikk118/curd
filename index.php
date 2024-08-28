@@ -1,47 +1,62 @@
 <?php
-  $alert=false;
-  $update=false;
-  $delete=false;
+session_start(); // Start the session at the beginning of the script
 
-     $username="root";
-     $servername="localhost:3307";
-     $password="";
-     $database="notify";
- 
-     $conn=mysqli_connect($servername,$username,$password,$database);
-    if(!$conn){
-        echo"no coonnection to database";
+$alert = false;
+$update = false;
+$delete = false;
+
+$username = "root";
+$servername = "localhost:3307";
+$password = "";
+$database = "notify";
+
+$conn = mysqli_connect($servername, $username, $password, $database);
+if (!$conn) {
+    die("No connection to database");
+}
+
+// Retrieve the logged-in user's rno from the session
+$rno = $_SESSION['rno'] ?? null; // Use null coalescing to handle unset session variable
+
+if ($rno === null) {
+    header("location:login.php");
+}
+// Check if delete operation is requested
+if (isset($_GET['delete']) && $rno !== null) {
+    $sno = $_GET['delete'];
+    // Delete note only if it belongs to the logged-in user
+    $sql = "DELETE FROM `notes` WHERE `sno` = '$sno' AND `rno` = '$rno'";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $delete = true;
     }
-    if(isset($_GET['delete'])){
-      $sno=$_GET['delete'];
-      $sql = "DELETE FROM `notes` WHERE `sno` = '$sno'"; 
-      $result=mysqli_query($conn,$sql);
-      if($delete){
-        $delete=true;
-      }
-    }
-    if($_SERVER['REQUEST_METHOD']=='POST'){
-      if(isset($_POST['snoedit'])){
-        $sno=$_POST['snoedit'];
-        $title=$_POST['titleedit'];
-        $desc=$_POST['descedit'];
-        $sql = "UPDATE `notes` SET `title` = '$title',`description`='$desc' WHERE `notes`.`sno` = '$sno'"; 
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $update=true;
+}
+
+// Check if a POST request is made
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $rno !== null) {
+    if (isset($_POST['snoedit'])) {
+        $sno = $_POST['snoedit'];
+        $title = $_POST['titleedit'];
+        $desc = $_POST['descedit'];
+        // Update note only if it belongs to the logged-in user
+        $sql = "UPDATE `notes` SET `title` = '$title', `description` = '$desc' WHERE `sno` = '$sno' AND `rno` = '$rno'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $update = true;
         }
-      }else{
-        $title=$_POST['title'];
-        $desc=$_POST['desc'];
-        $sql = "INSERT INTO `notes` ( `title`, `description`, `time`) VALUES ('$title', '$desc', current_timestamp())";
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $alert=true;
-          // echo"success";
+    } else {
+        // Inserting a new note
+        $title = $_POST['title'];
+        $desc = $_POST['desc'];
+        $sql = "INSERT INTO `notes` (`title`, `description`, `time`, `rno`) VALUES ('$title', '$desc', current_timestamp(), '$rno')";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $alert = true;
         }
-      }
     }
+}
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -127,29 +142,29 @@ if($delete){
     <div id="notes-container">
 
 
-        <?php
-    $sql="SELECT * FROM `notes`";
-    $result=mysqli_query($conn,$sql);
-    $sno=1;
-    while($row=mysqli_fetch_assoc($result)){
-       echo'
-       <div class="dis_container">
+    <?php
+ 
+ $sql = "SELECT * FROM `notes` WHERE `rno` = '$rno'";
+ $result = mysqli_query($conn, $sql);
+ $sno = 1;
+ 
+ while ($row = mysqli_fetch_assoc($result)) {
+     echo '
+     <div class="dis_container">
+         <div class="display">
+             <h2 class="display_title">' . htmlspecialchars($row['title']) . '</h2>
+             <p class="display_name">' . htmlspecialchars($row['description']) . '</p>
+             <div class="btns">
+                 <button id="' . $row['sno'] . '" type="button" class="edit btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editmodal">Edit</button>
+                 <button type="button" class="delete btn btn-primary btn-sm mx-3" id="d' . $row['sno'] . '">Delete</button>
+             </div>
+             <p class="time">' . $row['time'] . '</p>
+         </div>
+     </div>';
+     $sno += 1;
+ }
+?>
 
-       <div class="display">
-        <h2 class="display_title">'.$row['title'].'</h2>
-        <p class="display_name">'.$row['description'].'</p>
-       
-         <div class="btns">
-        <button id='.$row['sno'].'  type="button" class=" edit btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editmodal">edit</button><button type="button" class=" delete btn btn-primary btn-sm mx-3" id=d'.$row['sno'].'>delete</button>
-        </div> 
-        <p class="time">'.$row['time'].'</p>
-       </div> 
-       </div> 
-       
-       ';
-       $sno+=1;
-    }
-    ?>
 
     </div>
     <div class="add">

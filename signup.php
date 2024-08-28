@@ -1,5 +1,7 @@
  <!-- sign Form -->
  <?php
+ session_start();
+ 
     $alert=false;
     $error=false;
     $notnull=false;
@@ -8,25 +10,42 @@
         $username=$_POST['username'];
         $password=$_POST['password'];
         $cpassword=$_POST['cpassword'];
-        $exists=false;
-        if($username==!null && $password==!null){
+       if($username==!null && $password==!null){
+          
 
-            if(($password===$cpassword)&&$exists==false){
-                $sql = "INSERT INTO `notes_login` ( `username`, `password`, `date`) VALUES ('$username', '$password', current_timestamp())";
-                $result=mysqli_query($conn,$sql);
-                if($result){
-                    $alert=true;
-                }
-            }else{
-                $error="password do not match";
+          $sql = "SELECT * FROM `notes_login` WHERE `username` = '$username'";
+          $result = mysqli_query($conn, $sql);
+          $num = mysqli_num_rows($result);
+
+          if($num>0){
+            echo"<script>alert('username already exist , Please choose a different username.');</script>";
+          }else{
+
+            if(($password===$cpassword)){
+              $sql = "INSERT INTO `notes_login` (`username`, `password`, `date`) VALUES ('$username', '$password', current_timestamp())";
+              $result = mysqli_query($conn, $sql);
+              
+              if ($result) {
+                // Use mysqli_insert_id($conn) if you want the ID of the inserted record
+                $inserted_id = mysqli_insert_id($conn);             
+                $alert = true;
+                $_SESSION['loggedin'] = true;
+                $_SESSION['username'] = $_POST['username'];
+                echo $_SESSION['username'];
+                
+                $_SESSION['rno'] = $inserted_id;  // Use $inserted_id instead of $row['rno']
+                echo $_SESSION['rno'];
+              } else {
+                $error = "An error occurred: " . mysqli_error($conn);
+              }
+              
             }
-        }else{
-                $notnull="please enter the values!";
+          }
+          }else{
+            $notnull="please enter the values!";
         }
     }
-        
-        
-        ?>
+           ?>
 
 <!doctype html>
 <html lang="en">
@@ -50,9 +69,7 @@
       <strong>Account created!</strong> You are now loggedin.
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>';
-      session_start();
-      $_SESSION['loggedin']=true;
-      $_SESSION['username']=$_POST['username'];
+     
       header("location:index.php");
     }
     if($error){
@@ -72,10 +89,12 @@
     
 <!-- Login Form -->
 <div class="login-container">
-  <h2> Create Account</h2>
+<h5> Welcome to Notify, where your tasks get simplified.</h5>
+<hr style="color:white ;opacity:1">
+  <h2>Create account!</h2>
   <form action="signup.php" method="post">
     <div class="form-group">
-      <label for="username">Username or Email</label>
+      <label for="username">Username</label>
       <input type="text" id="username" name="username" required>
     </div>
     
@@ -89,6 +108,7 @@
     </div>
     
     <button type="submit">signup</button>
+    
     
     
   </form>

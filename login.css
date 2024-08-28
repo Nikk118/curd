@@ -1,6 +1,7 @@
 
 .login-container {
-	background-color: #ffffff;
+	
+	background-color:#625c28;
 	border-radius: 8px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	padding: 20px;
@@ -13,8 +14,12 @@
 
   }
   
-  .login-container h2 {
+  .login-container h2,p{
 	margin-top: 0;
+	color: #fffffc;
+  }
+  hr{
+	opacity: 1;
   }
   
   .form-group {
@@ -25,6 +30,7 @@
 	display: block;
 	margin-bottom: 5px;
 	font-weight: bold;
+	color: white;
   }
   
   .form-group input {
@@ -44,6 +50,7 @@
 	color: #fff;
 	font-size: 16px;
 	cursor: pointer;
+	
   }
   
   button:hover {
