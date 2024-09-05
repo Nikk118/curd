@@ -14,7 +14,7 @@
 
   }
   
-  .login-container h2,p{
+  .login-container h2,h5{
 	margin-top: 0;
 	color: #fffffc;
   }
@@ -60,6 +60,9 @@
   .form-footer {
 	margin-top: 15px;
 	text-align: center;
+  }
+  .form-footer p {
+	color: #fffffc;
   }
   
   .form-footer a {

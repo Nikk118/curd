@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <!-- Login Form -->
 <div class="login-container">
-    <p>Welcome Back! to Notify, where your tasks get simplified.</p>
+    <h5>Welcome Back! to Notify, where your tasks get simplified.</h5>
     <hr style="color:white ;opacity:1" >
     <h2>login</h2>
     
