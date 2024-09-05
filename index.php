@@ -1,47 +1,62 @@
 <?php
-  $alert=false;
-  $update=false;
-  $delete=false;
+session_start(); // Start the session at the beginning of the script
 
-     $username="root";
-     $servername="localhost:3307";
-     $password="";
-     $database="notify";
- 
-     $conn=mysqli_connect($servername,$username,$password,$database);
-    if(!$conn){
-        echo"no coonnection to database";
+$alert = false;
+$update = false;
+$delete = false;
+
+$username = "root";
+$servername = "localhost:3307";
+$password = "";
+$database = "notify";
+
+$conn = mysqli_connect($servername, $username, $password, $database);
+if (!$conn) {
+    die("No connection to database");
+}
+
+// Retrieve the logged-in user's rno from the session
+$rno = $_SESSION['rno'] ?? null; // Use null coalescing to handle unset session variable
+
+if ($rno === null) {
+    header("location:login.php");
+}
+// Check if delete operation is requested
+if (isset($_GET['delete']) && $rno !== null) {
+    $sno = $_GET['delete'];
+    // Delete note only if it belongs to the logged-in user
+    $sql = "DELETE FROM `notes` WHERE `sno` = '$sno' AND `rno` = '$rno'";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $delete = true;
     }
-    if(isset($_GET['delete'])){
-      $sno=$_GET['delete'];
-      $sql = "DELETE FROM `notes` WHERE `sno` = '$sno'"; 
-      $result=mysqli_query($conn,$sql);
-      if($delete){
-        $delete=true;
-      }
-    }
-    if($_SERVER['REQUEST_METHOD']=='POST'){
-      if(isset($_POST['snoedit'])){
-        $sno=$_POST['snoedit'];
-        $title=$_POST['titleedit'];
-        $desc=$_POST['descedit'];
-        $sql = "UPDATE `notes` SET `title` = '$title',`description`='$desc' WHERE `notes`.`sno` = '$sno'"; 
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $update=true;
+}
+
+// Check if a POST request is made
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $rno !== null) {
+    if (isset($_POST['snoedit'])) {
+        $sno = $_POST['snoedit'];
+        $title = $_POST['titleedit'];
+        $desc = $_POST['descedit'];
+        // Update note only if it belongs to the logged-in user
+        $sql = "UPDATE `notes` SET `title` = '$title', `description` = '$desc' WHERE `sno` = '$sno' AND `rno` = '$rno'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $update = true;
         }
-      }else{
-        $title=$_POST['title'];
-        $desc=$_POST['desc'];
-        $sql = "INSERT INTO `notes` ( `title`, `description`, `time`) VALUES ('$title', '$desc', current_timestamp())";
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $alert=true;
-          // echo"success";
+    } else {
+        // Inserting a new note
+        $title = $_POST['title'];
+        $desc = $_POST['desc'];
+        $sql = "INSERT INTO `notes` (`title`, `description`, `time`, `rno`) VALUES ('$title', '$desc', current_timestamp(), '$rno')";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $alert = true;
         }
-      }
     }
+}
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -95,28 +110,7 @@
         </div>
     </div>
 
-    <nav class="navbar">
-        <div class="container-fluid">
-            
-            <a class="navbar-brand" href="#" id="title"><svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="white" class="bi bi-list-columns-reverse" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 0 .5m4 0a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10A.5.5 0 0 1 4 .5m-4 2A.5.5 0 0 1 .5 2h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-4 2A.5.5 0 0 1 .5 4h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5m-4 2A.5.5 0 0 1 .5 6h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5m-4 2A.5.5 0 0 1 .5 8h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5m-4 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5m-4 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m-4 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
-</svg>Notify</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="search-container">
-
-    <input type="text" id="search-input"  placeholder="Search notes...">
-    <button id="search-button"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-search" viewBox="0 0 16 16">
-  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-</svg></button>
-            
-        </div>
-        
-</div>
-    </nav>
+   <?php require "nav.php"?>
     <?php
 if($alert){
   echo'<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -139,49 +133,51 @@ if($delete){
 ?>
 
 
-<div class="sort-buttons">
-    <button id="sort-name">Name ↕</button>
-    <button id="sort-description">Description ↕</button>
-    <button id="sort-time">Time ↕</button>
-</div>
+    <div class="sort-buttons">
+        <button id="sort-name">Name ↕</button>
+        <button id="sort-description">Description ↕</button>
+        <button id="sort-time">Time ↕</button>
+    </div>
 
-<div id="notes-container">
-    
+    <div id="notes-container">
+
 
     <?php
-    $sql="SELECT * FROM `notes`";
-    $result=mysqli_query($conn,$sql);
-    $sno=1;
-    while($row=mysqli_fetch_assoc($result)){
-       echo'
-       <div class="dis_container">
+ 
+ $sql = "SELECT * FROM `notes` WHERE `rno` = '$rno'";
+ $result = mysqli_query($conn, $sql);
+ $sno = 1;
+ 
+ while ($row = mysqli_fetch_assoc($result)) {
+     echo '
+     <div class="dis_container">
+         <div class="display">
+             <h2 class="display_title">' . htmlspecialchars($row['title']) . '</h2>
+             <p class="display_name">' . htmlspecialchars($row['description']) . '</p>
+             <div class="btns">
+                 <button id="' . $row['sno'] . '" type="button" class="edit btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editmodal">Edit</button>
+                 <button type="button" class="delete btn btn-primary btn-sm mx-3" id="d' . $row['sno'] . '">Delete</button>
+             </div>
+             <p class="time">' . $row['time'] . '</p>
+         </div>
+     </div>';
+     $sno += 1;
+ }
+?>
 
-       <div class="display">
-        <h2 class="display_title">'.$row['title'].'</h2>
-        <p class="display_name">'.$row['description'].'</p>
-       
-         <div class="btns">
-        <button id='.$row['sno'].'  type="button" class=" edit btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editmodal">edit</button><button type="button" class=" delete btn btn-primary btn-sm mx-3" id=d'.$row['sno'].'>delete</button>
-        </div> 
-        <p class="time">'.$row['time'].'</p>
-       </div> 
-       </div> 
-       
-       ';
-       $sno+=1;
-    }
-    ?> 
-   
-</div>
+
+    </div>
     <div class="add">
 
-      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="orange" class="bi bi-plus-circle-fill " viewBox="0 0 16 16" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="orange" class="bi bi-plus-circle-fill "
+            viewBox="0 0 16 16" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <path
+                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
         </svg>
     </div>
-   
-   
- <!-- </button>  -->
+
+
+
 
 
     <!-- Modal -->
@@ -212,17 +208,17 @@ if($delete){
                             <button type="submit" class="btn btn-primary">Add</button>
                     </form>
                 </div>
-                <!-- </div> -->
-                <!-- <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               
             </div>
         </div>
     </div>
-    
+    <!-- </div> -->
 
-    
+
+
 
 
     <!-- Optional JavaScript; choose one of the two! -->
@@ -234,7 +230,7 @@ if($delete){
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
-    
+
     <script src="script.js"></script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
@@ -243,5 +239,4 @@ if($delete){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     -->
 </body>
-
 </html>
