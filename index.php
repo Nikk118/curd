@@ -25,7 +25,7 @@ if ($rno === null) {
 if (isset($_GET['delete']) && $rno !== null) {
     $sno = $_GET['delete'];
     // Delete note only if it belongs to the logged-in user
-    $sql = "DELETE FROM `notes` WHERE `sno` = '$sno' AND `rno` = '$rno'";
+    $sql = "DELETE FROM `notes1` WHERE `sno` = '$sno' AND `rno` = '$rno'";
     $result = mysqli_query($conn, $sql);
     if ($result) {
         $delete = true;
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $rno !== null) {
         $title = $_POST['titleedit'];
         $desc = $_POST['descedit'];
         // Update note only if it belongs to the logged-in user
-        $sql = "UPDATE `notes` SET `title` = '$title', `description` = '$desc' WHERE `sno` = '$sno' AND `rno` = '$rno'";
+        $sql = "UPDATE `notes1` SET `title` = '$title', `description` = '$desc' WHERE `sno` = '$sno' AND `rno` = '$rno'";
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $update = true;
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $rno !== null) {
         // Inserting a new note
         $title = $_POST['title'];
         $desc = $_POST['desc'];
-        $sql = "INSERT INTO `notes` (`title`, `description`, `time`, `rno`) VALUES ('$title', '$desc', current_timestamp(), '$rno')";
+        $sql = "INSERT INTO `notes1` (`title`, `description`, `time`, `rno`) VALUES ('$title', '$desc', current_timestamp(), '$rno')";
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $alert = true;
@@ -134,7 +134,7 @@ if($delete){
 
 
     <div class="sort-buttons">
-        <button id="sort-name">Name ↕</button>
+        <button id="sort-name active">Name ↕</button>
         <button id="sort-description">Description ↕</button>
         <button id="sort-time">Time ↕</button>
     </div>
@@ -144,7 +144,7 @@ if($delete){
 
     <?php
  
- $sql = "SELECT * FROM `notes` WHERE `rno` = '$rno'";
+ $sql = "SELECT * FROM `notes1` WHERE `rno` = '$rno'";
  $result = mysqli_query($conn, $sql);
  $sno = 1;
  
@@ -215,7 +215,8 @@ if($delete){
             </div>
         </div>
     </div>
-    <!-- </div> -->
+    </div>
+     <?php require 'footer.php' ?>
 
 
 

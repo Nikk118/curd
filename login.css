@@ -1,12 +1,12 @@
 
 .login-container {
 	
-	background-color:#625c28;
+	background-color:white;
 	border-radius: 8px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	padding: 20px;
 	/* width: 300px; */
-	width: 60%;
+	width: 40%;
 	margin: auto;
 	margin-top: 20px;
 	margin-bottom: 20px;
@@ -16,7 +16,7 @@
   
   .login-container h2,h5{
 	margin-top: 0;
-	color: #fffffc;
+	color: black;
   }
   hr{
 	opacity: 1;
@@ -30,17 +30,29 @@
 	display: block;
 	margin-bottom: 5px;
 	font-weight: bold;
-	color: white;
+	color: black;
   }
   
-  .form-group input {
+  .form-group  {
+	
+	display: flex;
 	width: 100%;
-	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-sizing: border-box;
+	border-width: 0px 0px 2px 0px;
+	border-style: solid;
+
   }
-  
+  .form-group input{
+	width: 100%;
+	font-size: 25px;
+	border: none;
+	outline: none;
+	padding: 6px 0px;
+}
+.form-group img{
+	width: 30px;
+	margin-left: 20px;
+	cursor: pointer;
+}
   button {
 	width: 100%;
 	padding: 10px;
@@ -62,11 +74,11 @@
 	text-align: center;
   }
   .form-footer p {
-	color: #fffffc;
+	color: black;
   }
   
   .form-footer a {
-	color: #007bff;
+	color: black;
 	text-decoration: none;
   }
   

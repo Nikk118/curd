@@ -13,7 +13,7 @@
        if($username==!null && $password==!null){
           
 
-          $sql = "SELECT * FROM `notes_login` WHERE `username` = '$username'";
+          $sql = "SELECT * FROM `note_login` WHERE `username` = '$username'";
           $result = mysqli_query($conn, $sql);
           $num = mysqli_num_rows($result);
 
@@ -22,7 +22,7 @@
           }else{
 
             if(($password===$cpassword)){
-              $sql = "INSERT INTO `notes_login` (`username`, `password`, `date`) VALUES ('$username', '$password', current_timestamp())";
+              $sql = "INSERT INTO `note_login` (`username`, `password`, `date`) VALUES ('$username', '$password', current_timestamp())";
               $result = mysqli_query($conn, $sql);
               
               if ($result) {
@@ -90,21 +90,24 @@
 <!-- Login Form -->
 <div class="login-container">
 <h5> Welcome to Notify, where your tasks get simplified.</h5>
-<hr style="color:white ;opacity:1">
+<hr>
   <h2>Create account!</h2>
   <form action="signup.php" method="post">
     <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required>
+    
+      <input type="text" id="username" placeholder="Username" name="username" required>
+      <img src="./icons/person.svg" alt="">
     </div>
     
     <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required>
+      
+      <input type="password" id="password" placeholder="Password" class="password-field" name="password" required>
+      <img src="./icons/eye-slash-fill.svg" class="icon" alt="">
     </div>
     <div class="form-group">
-      <label for="cpassword"> Confirm Password</label>
-      <input type="password" id="password" name="cpassword" required>
+      
+      <input type="password" id="cpassword" placeholder="Confirm Passowrd" class="password-field2" name="cpassword" required>
+      <img src="./icons/eye-slash-fill.svg" class="icon2" alt="">
     </div>
     
     <button type="submit">signup</button>
@@ -113,21 +116,47 @@
     
   </form>
 </div>
-
-
-
-
-
-
-
-
-
+<?php require 'footer.php' ?>
 
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
+    
+    <script>
+   document.addEventListener('DOMContentLoaded', () => {
+  const passwordField = document.querySelector('.password-field'); // Select the password input
+  const toggleIcon = document.querySelector('.icon'); // Select the toggle icon (image)
+
+  toggleIcon.addEventListener('click', () => {
+    // Check the current type of the input field
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';  // Change the type to 'text' to unhide the password
+      toggleIcon.src = './icons/eye-fill.svg';  // Change the icon to represent 'hidden' state (optional)
+    } else {
+      passwordField.type = 'password';  // Change the type back to 'password' to hide the password
+      toggleIcon.src = './icons/eye-slash-fill.svg';  // Change the icon back to represent 'visible' state (optional)
+    }
+  });
+
+  const passwordField2 = document.querySelector('.password-field2'); // Select the password input
+  const toggleIcon2 = document.querySelector('.icon2'); // Select the toggle icon (image)
+
+  toggleIcon2.addEventListener('click', () => {
+    // Check the current type of the input field
+    if (passwordField2.type === 'password') {
+      passwordField2.type = 'text';  // Change the type to 'text' to unhide the password
+      toggleIcon2.src = './icons/eye-fill.svg';  // Change the icon to represent 'hidden' state (optional)
+    } else {
+      passwordField2.type = 'password';  // Change the type back to 'password' to hide the password
+      toggleIcon2.src = './icons/eye-slash-fill.svg';  // Change the icon back to represent 'visible' state (optional)
+    }
+  });
+});
+
+
     </script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
