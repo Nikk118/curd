@@ -1,47 +1,62 @@
 <?php
-  $alert=false;
-  $update=false;
-  $delete=false;
+session_start(); // Start the session at the beginning of the script
 
-     $username="root";
-     $servername="localhost:3307";
-     $password="";
-     $database="notify";
- 
-     $conn=mysqli_connect($servername,$username,$password,$database);
-    if(!$conn){
-        echo"no coonnection to database";
+$alert = false;
+$update = false;
+$delete = false;
+
+$username = "root";
+$servername = "localhost:3307";
+$password = "";
+$database = "notify";
+
+$conn = mysqli_connect($servername, $username, $password, $database);
+if (!$conn) {
+    die("No connection to database");
+}
+
+// Retrieve the logged-in user's rno from the session
+$rno = $_SESSION['rno'] ?? null; // Use null coalescing to handle unset session variable
+
+if ($rno === null) {
+    header("location:login.php");
+}
+// Check if delete operation is requested
+if (isset($_GET['delete']) && $rno !== null) {
+    $sno = $_GET['delete'];
+    // Delete note only if it belongs to the logged-in user
+    $sql = "DELETE FROM `notes1` WHERE `sno` = '$sno' AND `rno` = '$rno'";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $delete = true;
     }
-    if(isset($_GET['delete'])){
-      $sno=$_GET['delete'];
-      $sql = "DELETE FROM `notes` WHERE `sno` = '$sno'"; 
-      $result=mysqli_query($conn,$sql);
-      if($delete){
-        $update=true;
-      }
-    }
-    if($_SERVER['REQUEST_METHOD']=='POST'){
-      if(isset($_POST['snoedit'])){
-        $sno=$_POST['snoedit'];
-        $title=$_POST['titleedit'];
-        $desc=$_POST['descedit'];
-        $sql = "UPDATE `notes` SET `title` = '$title',`description`='$desc' WHERE `notes`.`sno` = '$sno'"; 
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $update=true;
+}
+
+// Check if a POST request is made
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $rno !== null) {
+    if (isset($_POST['snoedit'])) {
+        $sno = $_POST['snoedit'];
+        $title = $_POST['titleedit'];
+        $desc = $_POST['descedit'];
+        // Update note only if it belongs to the logged-in user
+        $sql = "UPDATE `notes1` SET `title` = '$title', `description` = '$desc' WHERE `sno` = '$sno' AND `rno` = '$rno'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $update = true;
         }
-      }else{
-        $title=$_POST['title'];
-        $desc=$_POST['desc'];
-        $sql = "INSERT INTO `notes` ( `title`, `description`, `time`) VALUES ('$title', '$desc', current_timestamp())";
-        $result=mysqli_query($conn,$sql);
-        if($result){
-          $alert=true;
-          // echo"success";
+    } else {
+        // Inserting a new note
+        $title = $_POST['title'];
+        $desc = $_POST['desc'];
+        $sql = "INSERT INTO `notes1` (`title`, `description`, `time`, `rno`) VALUES ('$title', '$desc', current_timestamp(), '$rno')";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $alert = true;
         }
-      }
     }
+}
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -56,11 +71,7 @@
 
     <title>Notes </title>
     <link rel="stylesheet" href="//cdn.datatables.net/2.1.3/css/dataTables.dataTables.min.css">
-    <style>
-        body{
-            background: black;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -99,32 +110,7 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Notify</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li> -->
-
-
-                </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+   <?php require "nav.php"?>
     <?php
 if($alert){
   echo'<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -138,62 +124,100 @@ if($update){
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
-if($update){
-  echo'<div class="alert alert-success alert-dismissible fade show" role="alert">
+if($delete){
+  echo'<div class="alert alert-danger alert-dismissible fade show" role="alert">
   <strong>sucess!</strong> note is delete 
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
 ?>
 
-    <div class="container" style="width:800px">
 
-        <form action="index.php" method="post" class="my-4">
-            <h1>Add a new note</h1>
-            <div class="mb-3">
-
-                <label for="title" class="form-label">Note title</label>
-                <input type="text" class="form-control" id="title" name="title" aria-describedby="emailHelp">
-
-                <div class="mb-3">
-                    <label for="desc" class="form-label">description</label>
-                    <textarea class="form-control" id="desc" name="desc"></textarea>
-
-                </div>
-
-                <button type="submit" class="btn btn-primary">Add</button>
-        </form>
+    <div class="sort-buttons">
+        <button id="sort-name active">Name ↕</button>
+        <button id="sort-description">Description ↕</button>
+        <button id="sort-time">Time ↕</button>
     </div>
 
-    <table class="table" id="myTable">
-        <thead>
-            <tr>
-                <th scope="col">sno</th>
-                <th scope="col">title</th>
-                <th scope="col">decsription</th>
-                <th scope="col">actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-    $sql="SELECT * FROM `notes`";
-    $result=mysqli_query($conn,$sql);
-    $sno=1;
-    while($row=mysqli_fetch_assoc($result)){
-        echo"<tr>
-      <th scope='row'>".$sno."</th>
-      <td>".$row['title']."</td>
-      <td>".$row['description']."</td>
-      <td><button id=".$row['sno']."  type='button' class=' edit btn btn-primary btn-sm'>edit</button><button type='button' class=' delete btn btn-primary btn-sm mx-3' id=d".$row['sno'].">delete</button></td>
-    </tr>";
-       $sno+=1;
-    }
-    ?>
+    <div id="notes-container">
 
 
-        </tbody>
-    </table>
-    <hr>
+    <?php
+ 
+ $sql = "SELECT * FROM `notes1` WHERE `rno` = '$rno'";
+ $result = mysqli_query($conn, $sql);
+ $sno = 1;
+ 
+ while ($row = mysqli_fetch_assoc($result)) {
+     echo '
+     <div class="dis_container">
+         <div class="display">
+             <h2 class="display_title">' . htmlspecialchars($row['title']) . '</h2>
+             <p class="display_name">' . htmlspecialchars($row['description']) . '</p>
+             <div class="btns">
+                 <button id="' . $row['sno'] . '" type="button" class="edit btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editmodal">Edit</button>
+                 <button type="button" class="delete btn btn-primary btn-sm mx-3" id="d' . $row['sno'] . '">Delete</button>
+             </div>
+             <p class="time">' . $row['time'] . '</p>
+         </div>
+     </div>';
+     $sno += 1;
+ }
+?>
+
+
+    </div>
+    <div class="add">
+
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="orange" class="bi bi-plus-circle-fill "
+            viewBox="0 0 16 16" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <path
+                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+        </svg>
+    </div>
+
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add a new note</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- <div class="container" style="width:800px"> -->
+
+                    <form action="index.php" method="post" class="my-4">
+                        <!-- <h1>Add a new note</h1> -->
+                        <div class="mb-3">
+
+                            <label for="title" class="form-label">Note title</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                aria-describedby="emailHelp">
+
+                            <div class="mb-3">
+                                <label for="desc" class="form-label">description</label>
+                                <textarea class="form-control" id="desc" name="desc"></textarea>
+
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               
+            </div>
+        </div>
+    </div>
+    </div>
+     <?php require 'footer.php' ?>
+
 
 
 
@@ -207,60 +231,8 @@ if($update){
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('#myTable').DataTable();
-    });
-    </script>
-    <script>
-    // Get all elements with the class name 'edit'
-    document.addEventListener('DOMContentLoaded', () => {
-        const edits = document.getElementsByClassName('edit');
 
-        Array.from(edits).forEach((element) => {
-            element.addEventListener('click', (e) => {
-                const tr = e.target.closest('tr');
-
-                if (tr) {
-                    const title = tr.getElementsByTagName('td')[0].textContent.trim();
-                    const desc = tr.getElementsByTagName('td')[1].textContent.trim();
-                    const sno = tr.getElementsByTagName('td')[2].textContent.trim();
-
-                    // Update the modal fields with the current note's data
-                    document.getElementById('titleedit').value = title;
-                    document.getElementById('descedit').value = desc;
-                    document.getElementById('snoedit').value = e.target.id;
-                    console.log(e.target.id)
-
-                    // Show the modal
-                    const editModal = new bootstrap.Modal(document.getElementById('editmodal'));
-                    editModal.show();
-                }
-            });
-        });
-        const deletes = document.getElementsByClassName('delete');
-
-Array.from(deletes).forEach((element) => {
-    element.addEventListener('click', (e) => {
-        const tr = e.target.closest('tr');
-
-        if (tr) {
-          sno=e.target.id.substr(1,)
-
-            // Update the modal fields with the current note's data
-           if(confirm("delete this node")){
-            console.log("yes")
-            window.location=`/curd/index.php?delete=${sno}`;
-          }else{
-             console.log("no")
-
-           }
-        }
-    });
-});
-
-    });
-    </script>
+    <script src="script.js"></script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--
@@ -268,5 +240,4 @@ Array.from(deletes).forEach((element) => {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     -->
 </body>
-
 </html>
